@@ -37,14 +37,45 @@ if (!-e $configFile) {
     die("Cannot find config file [" . $configFile . "]");
 }
 
-my $config = undef;
+my $rConfig = undef;
 for (@{Config::Any->load_files({ files => [$configFile], use_ext => 1 })}) {
     my ($filename, $tmpConfig) = %$_;
-    $config = $tmpConfig;
+    $rConfig = $tmpConfig;
     next;
 }
 
-print Dumper($config);
+my $rDatabases = getDatabasesFromConfig($rConfig);
+#my $rStats = getStatsFromConfig($rConfig);
+print Dumper($rConfig);
+print Dumper($rDatabases);
+#print Dumper($rStats);
 
 
 exit();
+
+sub getDatabasesFromConfig {
+    my ($rConfig) = @_;
+    my $rOut;
+    if (defined($rConfig->{sources}->{database})) {
+        if (defined($rConfig->{sources}->{database}->{id})) {
+            # Only one database to parse
+            return getDatabaseFromConfig($rConfig->{sources}->{database});
+        } else {
+            foreach my $databaseConfigKey (keys(%{$rConfig->{sources}->{database}})) {
+                my $tmp = getDatabaseFromConfig($rConfig->{sources}->{database}->{$databaseConfigKey});
+                while (my ($key, $rValue) = each(%$tmp)) {
+                    $rOut->{$key} = $rValue;
+                }
+            }
+        }
+    }
+
+    return $rOut;
+}
+
+sub getDatabaseFromConfig {
+    my ($rConfig) = @_;
+    my $rOut;
+    $rOut->{$rConfig->{id}} = $rConfig;
+    return $rOut;
+}
