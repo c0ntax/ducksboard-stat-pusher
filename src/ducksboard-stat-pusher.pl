@@ -46,12 +46,70 @@ for (@{Config::Any->load_files({ files => [$configFile], use_ext => 1 })}) {
 
 my $rDatabases = getDataFromConfig('database', $rConfig);
 my $rStats = getDataFromConfig('stat', $rConfig);
-print Dumper($rConfig);
-print Dumper($rDatabases);
-print Dumper($rStats);
+
+# Now that we have the config, we can start to do the hard work
+
+my $rStatsToProcess = undef;
+if (defined($pushId)) {
+    if (defined($rStats->{$pushId})) {
+        $rStatsToProcess->{$pushId} = $rStats->{$pushId};
+    } else {
+        die('Unknown stat id [' . $pushId . ']');
+    }
+} else {
+    $rStatsToProcess = $rStats;
+}
+
+	while (my ($key, $rJob) = each(%$rStatsToProcess)) {
+		$util->vPrint('Processing ' . $key . ':' . $rJob->{name} . '...');
+		if (&isTimeForJob($key, $rJob)) {
+			if (&processJob($key, $rJob)) {
+				$util->vPrint("Done\n");
+			} else {
+				$util->vPrint("Fail\n");
+			}
+		} else {
+			$util->vPrint("Skipped\n");
+		}
+	}    
+
+
+
+#print Dumper($rConfig);
+#print Dumper($rDatabases);
+#print Dumper($rStats);
 
 
 exit();
+
+sub processJob {
+    my ($key, $rJob) = @_;
+
+
+    print Dumper($rJob);
+}
+
+sub isTimeForJob {
+	my ($key, $rJob) = @_;
+
+	if (!defined($rJob->{'schedule'}) || $rJob->{'schedule'} eq 'instant') {
+		return 1;
+	} elsif ($rJob->{'schedule'} eq 'daily') {
+		my ($year, $month, $day) = (gmtime())[5,4,3];
+		$year+=1900;
+		$month++;
+		my $path = $rConfig->{paths}->{memory} . '/daily-' . $key . '-' . sprintf('%04d-%02d-%02d', $year, $month, $day);
+		if (-e $path) {
+			return 0;
+		} else {
+			my $ft = new File::Touch();
+        	$ft->touch($path);
+        	return 1;
+		}
+	} else {
+		die('Unknown schedule: ' . $rJob->{'schedule'});
+	}
+}
 
 sub getDataFromConfig {
     my ($type, $rConfig) = @_;

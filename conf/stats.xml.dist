@@ -3,6 +3,10 @@
         <key>provided by ducksboard</key>
     </ducksboard>
 
+    <paths>
+        <memory>../data/memory</memory>
+    </paths>
+
     <sources>
         <database id="databaseId1">
             <type>mysql</type>
@@ -15,7 +19,7 @@
     </sources>
 
     <stats>
-        <stat id="ducksboardWidgetId">
+        <stat id="ducksboardWidgetId1">
             <name>The name of the stat</name>
             <type>database</type>
             <database-id>databaseId1</database-id>
