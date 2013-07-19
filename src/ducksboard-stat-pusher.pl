@@ -44,7 +44,7 @@ for (@{Config::Any->load_files({ files => [$configFile], use_ext => 1 })}) {
     next;
 }
 
-my $rDatabases = getDatabasesFromConfig($rConfig);
+my $rDatabases = getDataFromConfig('database', $rConfig);
 #my $rStats = getStatsFromConfig($rConfig);
 print Dumper($rConfig);
 print Dumper($rDatabases);
@@ -53,16 +53,26 @@ print Dumper($rDatabases);
 
 exit();
 
-sub getDatabasesFromConfig {
-    my ($rConfig) = @_;
+sub getDataFromConfig {
+    my ($type, $rConfig) = @_;
     my $rOut;
-    if (defined($rConfig->{sources}->{database})) {
-        if (defined($rConfig->{sources}->{database}->{id})) {
+    my $rConfigChunk = undef;
+    if ($type eq 'database') {
+        $rConfigChunk = $rConfig->{sources}->{database};
+    }
+
+    if (defined($rConfigChunk)) {
+        if (defined($rConfigChunk->{id})) {
             # Only one database to parse
-            return getDatabaseFromConfig($rConfig->{sources}->{database});
+            if ($type eq 'database') {
+                return getDatabaseFromConfig($rConfigChunk);
+            }
         } else {
-            foreach my $databaseConfigKey (keys(%{$rConfig->{sources}->{database}})) {
-                my $tmp = getDatabaseFromConfig($rConfig->{sources}->{database}->{$databaseConfigKey});
+            foreach my $databaseConfigKey (keys(%{$rConfigChunk})) {
+                my $tmp = undef;
+                if ($type eq 'database') {
+                    $tmp = getDatabaseFromConfig($rConfigChunk->{$databaseConfigKey});
+                }
                 while (my ($key, $rValue) = each(%$tmp)) {
                     $rOut->{$key} = $rValue;
                 }
@@ -78,4 +88,9 @@ sub getDatabaseFromConfig {
     my $rOut;
     $rOut->{$rConfig->{id}} = $rConfig;
     return $rOut;
+}
+
+sub getStatsFromConfig {
+    my ($rConfig) = @_;
+
 }
