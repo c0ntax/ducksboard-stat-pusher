@@ -1,0 +1,27 @@
+<config>
+    <ducksboard>
+        <key>provided by ducksboard</key>
+    </ducksboard>
+
+    <sources>
+        <database id="databaseId1">
+            <type>mysql</type>
+            <host>localhost</host>
+            <port>3306</port>
+            <name>databaseName</name>
+            <user>username</user>
+            <password>password</password>
+        </database>
+    </sources>
+
+    <stats>
+        <stat id="ducksboardWidgetId">
+            <name>The name of the stat</name>
+            <type>database</type>
+            <database-id>databaseId1</database-id>
+            <schedule>instant|daily</schedule>
+            <slot-kind>counter|gauge|graph|bar|box|pin|image|status|text|timeline|leaderboard|funnel|completion</slot-kind>
+            <query>select count(*) from tmp</query>
+        </stat>
+    </stats>
+</config>
