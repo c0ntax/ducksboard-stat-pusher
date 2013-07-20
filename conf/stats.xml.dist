@@ -25,7 +25,7 @@
             <database-id>databaseId1</database-id>
             <schedule>instant|daily</schedule>
             <slot-kind>counter|gauge|graph|bar|box|pin|image|status|text|timeline|leaderboard|funnel|completion</slot-kind>
-            <query>select count(*) from tmp</query>
+            <query>select count(*) as value from tmp</query>
         </stat>
     </stats>
 </config>
