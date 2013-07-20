@@ -121,6 +121,8 @@ sub processJob {
     my $data = undef;
     if ($jobType eq 'intValue') {
         $data = &processIntValue($key, $rJob);
+    } elsif ($jobType eq 'percentValue') {
+        $data = &processPercentValue($key, $rJob);
     } else {
         die ('Slot kind of ' . $rJob->{'slot-kind'} . ' unsupported at this time');
     }
@@ -164,6 +166,12 @@ sub processIntValue {
 	}
 
 	return \%data;
+}
+
+sub processPercentValue {
+    my ($key, $rJob) = @_;
+
+    return processIntValue($key, $rJob);
 }
 
 sub sendData {
@@ -235,8 +243,11 @@ sub getDataFromConfig {
         } else {
             foreach my $databaseConfigKey (keys(%{$rConfigChunk})) {
                 my $tmp = undef;
+
+                # Config::Any insists on doing stupid things with the 'name' key
+                $rConfigChunk->{$databaseConfigKey}->{name} = $databaseConfigKey;
+
                 if ($type eq 'database') {
-                    $rConfigChunk->{$databaseConfigKey}->{name} = $databaseConfigKey;
                     $tmp = getDatabaseFromConfig($rConfigChunk->{$databaseConfigKey});
                 } elsif ($type eq 'stat') {
                     $tmp = getStatFromConfig($rConfigChunk->{$databaseConfigKey});
