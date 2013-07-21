@@ -123,6 +123,8 @@ sub processJob {
         $data = &processIntValue($key, $rJob);
     } elsif ($jobType eq 'percentValue') {
         $data = &processPercentValue($key, $rJob);
+    } elsif ($jobType eq 'timedValue') {
+        $data = &processTimedValue($key, $rJob);
     } else {
         die ('Slot kind of ' . $rJob->{'slot-kind'} . ' unsupported at this time');
     }
@@ -173,6 +175,24 @@ sub processPercentValue {
 
     return processIntValue($key, $rJob);
 }
+
+sub processTimedValue {
+    my ($key, $rJob) = @_;
+
+	my @data;
+	my $query = $rDatabases->{$rJob->{'database-id'}}->{dbh}->prepare($rJob->{query});
+	$query->execute() || die("Cannot execute query [" . $rJob->{query} . ']');
+	while (my $row = $query->fetchrow_hashref()) {
+	    my %tmp;
+		$tmp{value} = $row->{value};
+		$tmp{timestamp} = int($row->{timestamp});
+
+		push(@data, \%tmp);
+	}
+
+	return \@data;
+}
+
 
 sub sendData {
 	my ($key, $data) = @_;
