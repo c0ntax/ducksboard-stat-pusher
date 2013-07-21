@@ -20,11 +20,16 @@
 
     <stats>
         <stat id="ducksboardWidgetId1">
+            <!-- The name must be unique -->
             <name>The name of the stat</name>
             <type>database</type>
+            <!-- references database id in sources -->
             <database-id>databaseId1</database-id>
+            <!-- Run the stat once a day or every time -->
             <schedule>instant|daily</schedule>
+            <!-- See http://dev.ducksboard.com/apidoc/slot-kinds/ -->
             <slot-kind>counter|gauge|graph|bar|box|pin|image|status|text|timeline|leaderboard|funnel|completion</slot-kind>
+            <!-- Database query *must use value/timestamp column names -->
             <query>select count(*) as value from tmp</query>
         </stat>
     </stats>
